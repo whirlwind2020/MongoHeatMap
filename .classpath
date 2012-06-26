@@ -4,7 +4,11 @@
 	<classpathentry kind="src" path="gen"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+<<<<<<< HEAD
+	<classpathentry kind="lib" path="/Users/Jacob/mongo-java-driver/build/main"/>
+=======
 	<classpathentry kind="lib" path="/Users/akshaynathan/mongodb/mongo-java-driver/build/main"/>
+>>>>>>> 77f165e750b03c61f78e7486f3bfc7b0297cde46
 	<classpathentry kind="lib" path="libs/mongo.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

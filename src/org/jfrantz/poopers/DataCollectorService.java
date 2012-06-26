@@ -1,4 +1,4 @@
-package com.mongodb.mapper;
+package org.jfrantz.poopers;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;

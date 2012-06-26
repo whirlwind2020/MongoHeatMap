@@ -1,4 +1,4 @@
-package com.mongodb.mapper;
+package org.jfrantz.poopers;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -24,6 +24,7 @@ import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import com.mongodb.QueryBuilder;
+import com.mongodb.mapper.R;
 
 public class ShowMapActivity extends MapActivity implements OnClickListener, PanChangeListener, ZoomChangeListener{	
 	public final String COLLECTION_NAME = "signalPoints";
@@ -63,14 +64,22 @@ public class ShowMapActivity extends MapActivity implements OnClickListener, Pan
         _heatMap = new HeatMapOverlay(20000, _map);
         _map.getOverlays().add(_heatMap);
         
-        try {
-			_mongo = new Mongo("localhost", 27017);
-	        _db = _mongo.getDB(DATABASE_NAME);
-	        _coll = _db.getCollection(COLLECTION_NAME);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		} catch (MongoException e) {
-			e.printStackTrace();
+        Thread connect = new Thread(new ConnectingRunnable());
+        connect.start();        
+	}
+	
+	/*Connects to the database, which Android mandates happens in separate thread*/
+	private class ConnectingRunnable implements Runnable {
+		public void run() {
+			try {
+				_mongo = new Mongo("localhost", 27017);
+		        _db = _mongo.getDB(DATABASE_NAME);
+		        _coll = _db.getCollection(COLLECTION_NAME);
+			} catch (UnknownHostException e) {
+				e.printStackTrace();
+			} catch (MongoException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -101,7 +110,8 @@ public class ShowMapActivity extends MapActivity implements OnClickListener, Pan
 		
 		/*NOW: use this box to geospatial query*/
 		QueryBuilder q = new QueryBuilder();
-		q.withinBox(bottomLeft[0], bottomLeft[1], upperRight[0], upperRight[1]);
+		q.withinCenterSphere(centerLong, centerLat, 100);
+		//q.withinBox(bottomLeft[0], bottomLeft[1], upperRight[0], upperRight[1]);
 		DBObject completedQuery = q.get();
 		
 		DBCursor results = _coll.find(completedQuery);

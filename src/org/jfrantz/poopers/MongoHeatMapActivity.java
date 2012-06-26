@@ -1,4 +1,4 @@
-package com.mongodb.mapper;
+package org.jfrantz.poopers;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -7,6 +7,8 @@ import java.net.UnknownHostException;
 
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
+
+import com.mongodb.mapper.R;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -33,9 +35,9 @@ public class MongoHeatMapActivity extends Activity {
 					BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 					Log.d("StartingProcess", "Starting Process");
 					String line;
-					while((line = in.readLine()) != null) {
-                         Log.d("StartingProcess",line);
-					}
+					//while((line = in.readLine()) != null) {
+                    //     Log.d("StartingProcess",line);
+					//}
         		} catch (IOException e) {
 					e.printStackTrace();
 				}
