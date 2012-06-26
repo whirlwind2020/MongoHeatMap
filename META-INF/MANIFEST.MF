@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.8.2
+Created-By: 1.6.0_33-b03-424-11M3720 (Apple Inc.)
+Bundle-ManifestVersion: 2
+Bundle-Name: MongoDB
+Bundle-SymbolicName: com.mongodb
+Bundle-ClassPath: mongo-java-driver-2.8.0.BUILD-SNAPSHOT.jar
+Bundle-Version: 2.8.0.BUILD-SNAPSHOT
+Import-Package: javax.management, javax.net, javax.net.ssl
+Export-Package: com.mongodb;version="2.8.0.BUILD-SNAPSHOT",com.mongodb
+ .io;version="2.8.0.BUILD-SNAPSHOT",com.mongodb.util;version="2.8.0.BU
+ ILD-SNAPSHOT",com.mongodb.gridfs;version="2.8.0.BUILD-SNAPSHOT",org.b
+ son;version="2.8.0.BUILD-SNAPSHOT",org.bson.util;version="2.8.0.BUILD
+ -SNAPSHOT",org.bson.util.annotations;version="2.8.0.BUILD-SNAPSHOT",o
+ rg.bson.types;version="2.8.0.BUILD-SNAPSHOT",org.bson.io;version="2.8
+ .0.BUILD-SNAPSHOT"
+

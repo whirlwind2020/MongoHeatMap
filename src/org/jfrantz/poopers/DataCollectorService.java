@@ -1,13 +1,10 @@
 package org.jfrantz.poopers;
 
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Random;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.Mongo;
-import com.mongodb.MongoException;
+import com.mongodb.*;
 
 import android.app.Service;
 import android.content.Context;
@@ -52,8 +49,10 @@ public class DataCollectorService extends Service implements LocationListener {
 			DB db = m.getDB( "data" );
 			BasicDBObject b = new BasicDBObject();
 			DBCollection coll = db.getCollection("signalPoints");
-			b.put("lat", location.getLatitude());
-			b.put("long", location.getLongitude());
+			ArrayList<BasicDBObject> loc = new ArrayList<BasicDBObject>();
+			loc.add(new BasicDBObject("lon", location.getLongitude()));
+			loc.add(new BasicDBObject("lat", location.getLatitude()));
+			b.put("loc", loc);
 			b.put("intensity", (rand.nextInt(18 + 1) * (Math.cos(location.getLatitude()) + Math.sin(location.getLongitude()) + 1)));
 			coll.insert(b);
 		} catch (UnknownHostException e) {

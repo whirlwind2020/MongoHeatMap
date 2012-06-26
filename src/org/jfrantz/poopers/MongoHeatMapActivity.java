@@ -3,6 +3,10 @@ package org.jfrantz.poopers;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.UnknownHostException;
+
+import com.mongodb.Mongo;
+import com.mongodb.MongoException;
 
 import com.mongodb.mapper.R;
 
@@ -19,8 +23,7 @@ public class MongoHeatMapActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main);
-        
+        setContentView(R.layout.main); 
         Button startServer = (Button) findViewById(R.id.start_database);
         startServer.setOnClickListener(new OnClickListener() {
         	public void onClick(View v) {
