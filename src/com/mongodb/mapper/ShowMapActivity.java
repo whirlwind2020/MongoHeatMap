@@ -123,14 +123,14 @@ public class ShowMapActivity extends MapActivity implements OnClickListener, Pan
 	}
 
 	public void onClick(View v) {
-		populateLater();		
+		updatePointsToCurrent();		
 	}
 
 	public void onZoom(int old, int current) {
-		populateLater();		
+		updatePointsToCurrent();		
 	}
 
 	public void onPan(GeoPoint old, GeoPoint current) {
-		populateLater();
+		updatePointsToCurrent();
 	}
 }
