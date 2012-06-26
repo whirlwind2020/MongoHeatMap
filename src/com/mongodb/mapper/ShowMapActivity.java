@@ -1,6 +1,8 @@
 package com.mongodb.mapper;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.List;
 
 import android.os.Bundle;
 import android.view.View;
@@ -14,29 +16,42 @@ import com.androidnatic.maps.model.HeatPoint;
 import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
-import com.google.android.maps.MapView;
 import com.google.android.maps.MyLocationOverlay;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBCursor;
+import com.mongodb.DBObject;
+import com.mongodb.Mongo;
+import com.mongodb.MongoException;
+import com.mongodb.QueryBuilder;
 
 public class ShowMapActivity extends MapActivity implements OnClickListener, PanChangeListener, ZoomChangeListener{	
+	public final String COLLECTION_NAME = "signalPoints";
+	public final String DATABASE_NAME = "data";
+	
 	SimpleMapView _map;
 	HeatMapOverlay _heatMap;
 	MapController _controller;
 	
+	Mongo _mongo;
+	DB _db;
+	DBCollection _coll;
 	
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.mapviewlayout);
+		
         _map = (SimpleMapView) findViewById(R.id.map_view_layout);
         _controller = _map.getController();
         
         _map.setBuiltInZoomControls(true);
         _map.setOnClickListener(this);
-        _map.setClickable(true);
+        _map.setClickable(false);
         _map.addPanChangeListener(this);
         _map.addZoomChangeListener(this);
         
         //start in PA
-        _controller.setCenter(new GeoPoint(0, 0));
+        _controller.setCenter(new GeoPoint(34, 121));
         _controller.setZoom(14);
         
         //pointer to current location
@@ -48,18 +63,15 @@ public class ShowMapActivity extends MapActivity implements OnClickListener, Pan
         _heatMap = new HeatMapOverlay(20000, _map);
         _map.getOverlays().add(_heatMap);
         
-        Runnable run = new Runnable() {
-			public void run() {
-				try {
-					Thread.sleep(3000);
-				} catch (InterruptedException e) {
-					e.printStackTrace();
-				}
-				populateLater();
-			}
-        };
-       Thread t = new Thread(run);
-       t.start();
+        try {
+			_mongo = new Mongo("localhost", 27017);
+	        _db = _mongo.getDB(DATABASE_NAME);
+	        _coll = _db.getCollection(COLLECTION_NAME);
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		} catch (MongoException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void populateLater() {
@@ -75,7 +87,35 @@ public class ShowMapActivity extends MapActivity implements OnClickListener, Pan
         _heatMap.update(test);
 	}
 	
+	public void updatePointsToCurrent() {
+		GeoPoint center = _map.getMapCenter();
+		
+		double centerLat = center.getLatitudeE6() / 1E6d;
+		double centerLong = center.getLongitudeE6() / 1e6d;
+		
+		double latSpan = _map.getLatitudeSpan() / 1E6d;
+		double longSpan = _map.getLongitudeSpan() / 1E6d;
+		
+		double[] bottomLeft = new double[] { centerLat - (latSpan/2) , centerLong - (longSpan/2)  };
+		double[] upperRight = new double[] {centerLat + (latSpan/2) , centerLong + (longSpan/2) };
+		
+		/*NOW: use this box to geospatial query*/
+		QueryBuilder q = new QueryBuilder();
+		q.withinBox(bottomLeft[0], bottomLeft[1], upperRight[0], upperRight[1]);
+		DBObject completedQuery = q.get();
+		
+		DBCursor results = _coll.find(completedQuery);
+		List<HeatPoint> heatPoints = asHeatPoints(results.toArray());
+		_heatMap.update(heatPoints);
+	}
 	
+	public List<HeatPoint> asHeatPoints(List<DBObject> alod) {
+		List<HeatPoint> toReturn = new ArrayList<HeatPoint>(alod.size());
+		for (int i = 0; i < alod.size(); i++) {
+			toReturn.set(i, HeatPoint.fromDBObject(alod.get(i)));
+		}
+		return toReturn;
+	}
 
 	@Override
 	protected boolean isRouteDisplayed() {
