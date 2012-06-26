@@ -21,6 +21,9 @@
  */
 package com.androidnatic.maps.model;
 
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
+
 /**
  * @author evincar
  *
@@ -42,6 +45,23 @@ public class HeatPoint {
 	
 	public HeatPoint(float lat, float lon){
 		this(lat,lon,1);
+	}
+	
+	public static HeatPoint fromDBObject(DBObject cur) {
+		HeatPoint toReturn = new HeatPoint();
+		toReturn.intensity = (Integer) cur.get("intensity");
+		toReturn.lat = (Float) cur.get("lat");
+		toReturn.lon = (Float) cur.get("lon");
+		return toReturn;
+	}
+	
+	/* JSON representation of a HeatPoint*/
+	public static DBObject toDBObject(HeatPoint p) {
+		BasicDBObject b = new BasicDBObject();
+		b.put("lat", p.lat);
+		b.put("lon", p.lon);
+		b.put("intensity", p.intensity);
+		return b;
 	}
 	
 }
