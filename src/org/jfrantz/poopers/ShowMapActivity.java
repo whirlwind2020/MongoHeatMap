@@ -115,8 +115,10 @@ public class ShowMapActivity extends MapActivity implements OnClickListener, Pan
 		DBObject completedQuery = q.get();
 		
 		DBCursor results = _coll.find(completedQuery);
-		List<HeatPoint> heatPoints = asHeatPoints(results.toArray());
-		_heatMap.update(heatPoints);
+		if (results != null) {
+			List<HeatPoint> heatPoints = asHeatPoints(results.toArray());
+			_heatMap.update(heatPoints);
+		}
 	}
 	
 	public List<HeatPoint> asHeatPoints(List<DBObject> alod) {

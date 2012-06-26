@@ -4,8 +4,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Random;
 
-import com.mongodb.*;
-
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -15,6 +13,12 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+
+import com.mongodb.BasicDBObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.Mongo;
+import com.mongodb.MongoException;
 
 public class DataCollectorService extends Service implements LocationListener {
 
@@ -30,36 +34,34 @@ public class DataCollectorService extends Service implements LocationListener {
 	}
 
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		try {
-			Thread.sleep(10000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		return Service.START_NOT_STICKY;
 	}
 
-	public void onLocationChanged(Location location) {
+	public void onLocationChanged(final Location location) {
 		double lat = location.getLatitude();
 		double lng = location.getLongitude();
 		Log.i("Service", "Location changed to " + lat + ", " + lng);
-		Random rand = new Random();
-		Mongo m;
-		try {
-			m = new Mongo( "localhost" , 27017 );
-			DB db = m.getDB( "data" );
-			BasicDBObject b = new BasicDBObject();
-			DBCollection coll = db.getCollection("signalPoints");
-			ArrayList<BasicDBObject> loc = new ArrayList<BasicDBObject>();
-			loc.add(new BasicDBObject("lon", location.getLongitude()));
-			loc.add(new BasicDBObject("lat", location.getLatitude()));
-			b.put("loc", loc);
-			b.put("intensity", (rand.nextInt(18 + 1) * (Math.cos(location.getLatitude()) + Math.sin(location.getLongitude()) + 1)));
-			coll.insert(b);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		} catch (MongoException e) {
-			e.printStackTrace();
-		}
+		final Random rand = new Random();
+		Thread t = new Thread(new Runnable() {
+			public void run() {
+				try {
+					Mongo m = new Mongo( "localhost" , 27017 );
+					DB db = m.getDB( "data" );
+					BasicDBObject b = new BasicDBObject();
+					DBCollection coll = db.getCollection("signalPoints");
+					ArrayList<BasicDBObject> loc = new ArrayList<BasicDBObject>();
+					loc.add(new BasicDBObject("lon", location.getLongitude()));
+					loc.add(new BasicDBObject("lat", location.getLatitude()));
+					b.put("loc", loc);
+					b.put("intensity", (rand.nextInt(18 + 1) * (Math.cos(location.getLatitude()) + Math.sin(location.getLongitude()) + 1)));
+					coll.insert(b);
+				} catch (UnknownHostException e) {
+					e.printStackTrace();
+				} catch (MongoException e) {
+					e.printStackTrace();
+				}
+			}
+		});
 
 	}
 
