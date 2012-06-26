@@ -46,14 +46,16 @@ public class DataCollectorService extends Service implements LocationListener {
 			public void run() {
 				try {
 					Mongo m = new Mongo( "localhost" , 27017 );
+					Log.d("HIJACOB", m.getDatabaseNames().toString());
 					DB db = m.getDB( "data" );
 					BasicDBObject b = new BasicDBObject();
 					DBCollection coll = db.getCollection("signalPoints");
-					ArrayList<BasicDBObject> loc = new ArrayList<BasicDBObject>();
-					loc.add(new BasicDBObject("lon", location.getLongitude()));
-					loc.add(new BasicDBObject("lat", location.getLatitude()));
+					coll.ensureIndex(new BasicDBObject("loc", "2d"));
+					ArrayList<Double> loc = new ArrayList<Double>();
+					loc.add(location.getLongitude());
+					loc.add(location.getLatitude());
 					b.put("loc", loc);
-					b.put("intensity", (rand.nextInt(18 + 1) * (Math.cos(location.getLatitude()) + Math.sin(location.getLongitude()) + 1)));
+					b.put("intensity", (int)(rand.nextInt(18 + 1) * (Math.cos(location.getLatitude()) * Math.sin(location.getLongitude()) + 1)));
 					coll.insert(b);
 				} catch (UnknownHostException e) {
 					e.printStackTrace();
@@ -62,6 +64,7 @@ public class DataCollectorService extends Service implements LocationListener {
 				}
 			}
 		});
+		t.start();
 	}
 
 	public void onProviderDisabled(String provider) {

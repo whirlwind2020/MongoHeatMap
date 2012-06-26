@@ -47,7 +47,7 @@ public class ShowMapActivity extends MapActivity implements OnClickListener, Pan
         
         _map.setBuiltInZoomControls(true);
         _map.setOnClickListener(this);
-        _map.setClickable(false);
+        _map.setClickable(true);
         _map.addPanChangeListener(this);
         _map.addZoomChangeListener(this);
         
@@ -61,7 +61,7 @@ public class ShowMapActivity extends MapActivity implements OnClickListener, Pan
         _map.getOverlays().add(mLoc);
         
         //add the HeatMap Overlay to the map
-        _heatMap = new HeatMapOverlay(20000, _map);
+        _heatMap = new HeatMapOverlay(200, _map);
         _map.getOverlays().add(_heatMap);
         
         Thread connect = new Thread(new ConnectingRunnable());
@@ -97,28 +97,48 @@ public class ShowMapActivity extends MapActivity implements OnClickListener, Pan
 	}
 	
 	public void updatePointsToCurrent() {
-		GeoPoint center = _map.getMapCenter();
+		Runnable r = new Runnable() {
+
+			public void run() {
+				GeoPoint center = _map.getMapCenter();
+				
+				double centerLat = center.getLatitudeE6() / 1E6d;
+				double centerLong = center.getLongitudeE6() / 1e6d;
+				
+				double latSpan = _map.getLatitudeSpan() / 1E6d;
+				double longSpan = _map.getLongitudeSpan() / 1E6d;
+				
+				double[] bottomLeft = new double[] { centerLat - (latSpan/2) , centerLong - (longSpan/2)  };
+				double[] upperRight = new double[] {centerLat + (latSpan/2) , centerLong + (longSpan/2) };
+				
+				/*NOW: use this box to geospatial query*/
+				QueryBuilder q = new QueryBuilder();
+				q.withinCenterSphere(centerLong, centerLat, 100);
+
+				DBObject completedQuery = q.get();
+				
+				//DBCursor results = _coll.find(completedQuery);
+				DBCursor results = _coll.find();
+				
+				System.out.println(results == null);
+				System.out.println(results.length());
+				
+				List<HeatPoint> heatPoints = new ArrayList<HeatPoint>();
+				for( DBObject obj: results)
+					heatPoints.add(HeatPoint.fromDBObject(obj));
+				_heatMap.update(heatPoints);
+				
+			}
+			
+		};
+		Thread t = new Thread(r);
+		t.start();
 		
-		double centerLat = center.getLatitudeE6() / 1E6d;
-		double centerLong = center.getLongitudeE6() / 1e6d;
 		
-		double latSpan = _map.getLatitudeSpan() / 1E6d;
-		double longSpan = _map.getLongitudeSpan() / 1E6d;
-		
-		double[] bottomLeft = new double[] { centerLat - (latSpan/2) , centerLong - (longSpan/2)  };
-		double[] upperRight = new double[] {centerLat + (latSpan/2) , centerLong + (longSpan/2) };
-		
-		/*NOW: use this box to geospatial query*/
-		QueryBuilder q = new QueryBuilder();
-		q.withinCenterSphere(centerLong, centerLat, 100);
-		//q.withinBox(bottomLeft[0], bottomLeft[1], upperRight[0], upperRight[1]);
-		DBObject completedQuery = q.get();
-		
-		DBCursor results = _coll.find(completedQuery);
-		if (results != null) {
+		/*if (results != null) {
 			List<HeatPoint> heatPoints = asHeatPoints(results.toArray());
 			_heatMap.update(heatPoints);
-		}
+		}*/
 	}
 	
 	public List<HeatPoint> asHeatPoints(List<DBObject> alod) {

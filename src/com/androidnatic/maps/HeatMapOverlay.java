@@ -116,6 +116,7 @@ public class HeatMapOverlay extends Overlay {
 			
 			Point out = new Point(1, 1);
 			for(HeatPoint p : points){
+				System.out.println(p);
 				GeoPoint in = new GeoPoint((int)(p.lat*1E6),(int)(p.lon*1E6));
 				proj.toPixels(in, out);
 				addPoint(out.x, out.y, p.intensity);

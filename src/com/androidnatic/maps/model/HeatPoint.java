@@ -21,6 +21,7 @@
  */
 package com.androidnatic.maps.model;
 
+import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
@@ -50,8 +51,9 @@ public class HeatPoint {
 	public static HeatPoint fromDBObject(DBObject cur) {
 		HeatPoint toReturn = new HeatPoint();
 		toReturn.intensity = (Integer) cur.get("intensity");
-		toReturn.lat = (Float) cur.get("lat");
-		toReturn.lon = (Float) cur.get("lon");
+		toReturn.intensity *= 100/37.0;
+		toReturn.lon = ((Double)((BasicDBList)cur.get("loc")).get(1)).floatValue();
+		toReturn.lat = ((Double)((BasicDBList)cur.get("loc")).get(0)).floatValue();
 		return toReturn;
 	}
 	
@@ -62,6 +64,10 @@ public class HeatPoint {
 		b.put("lon", p.lon);
 		b.put("intensity", p.intensity);
 		return b;
+	}
+	
+	public String toString() {
+		return "[" + this.lat + "," + this.lon + "], intensity " + this.intensity;
 	}
 	
 }
