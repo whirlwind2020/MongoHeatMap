@@ -49,6 +49,7 @@ public class DataCollectorService extends Service implements LocationListener {
 			DB db = m.getDB( "data" );
 			BasicDBObject b = new BasicDBObject();
 			DBCollection coll = db.getCollection("signalPoints");
+			coll.ensureIndex(new BasicDBObject("loc", "2d"));
 			ArrayList<BasicDBObject> loc = new ArrayList<BasicDBObject>();
 			loc.add(new BasicDBObject("lon", location.getLongitude()));
 			loc.add(new BasicDBObject("lat", location.getLatitude()));
