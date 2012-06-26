@@ -62,7 +62,6 @@ public class DataCollectorService extends Service implements LocationListener {
 				}
 			}
 		});
-
 	}
 
 	public void onProviderDisabled(String provider) {
