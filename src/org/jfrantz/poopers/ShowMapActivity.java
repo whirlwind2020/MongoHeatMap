@@ -5,8 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
+import android.widget.RelativeLayout;
 
 import com.androidnatic.maps.HeatMapOverlay;
 import com.androidnatic.maps.SimpleMapView;
@@ -26,13 +29,14 @@ import com.mongodb.MongoException;
 import com.mongodb.QueryBuilder;
 import com.mongodb.mapper.R;
 
-public class ShowMapActivity extends MapActivity implements OnClickListener, PanChangeListener, ZoomChangeListener{	
+public class ShowMapActivity extends MapActivity implements OnClickListener, PanChangeListener, ZoomChangeListener, OnTouchListener{	
 	public final String COLLECTION_NAME = "signalPoints";
 	public final String DATABASE_NAME = "data";
 	
 	SimpleMapView _map;
 	HeatMapOverlay _heatMap;
 	MapController _controller;
+	MyLocationOverlay _mLoc;
 	
 	Mongo _mongo;
 	DB _db;
@@ -50,24 +54,37 @@ public class ShowMapActivity extends MapActivity implements OnClickListener, Pan
         _map.setClickable(true);
         _map.addPanChangeListener(this);
         _map.addZoomChangeListener(this);
+        ((RelativeLayout) findViewById(R.id.map_root)).setOnTouchListener(this);
         
-        //start in PA
-        _controller.setCenter(new GeoPoint(34, 121));
-        _controller.setZoom(14);
         
         //pointer to current location
-        MyLocationOverlay mLoc = new MyLocationOverlay(this, _map);
-        mLoc.enableMyLocation();
-        _map.getOverlays().add(mLoc);
+        _mLoc = new MyLocationOverlay(this, _map);
+        _mLoc.enableMyLocation();
+        _map.getOverlays().add(_mLoc);
+        
+        //start at our current Location
+        if (_mLoc.getMyLocation() != null) 
+        	_controller.setCenter(_mLoc.getMyLocation());
+        else
+        	_controller.setCenter(new GeoPoint((int) (37.448965*1e6f), (int) (-122.15857*1e6f)));
+        _controller.setZoom(13);
         
         //add the HeatMap Overlay to the map
-        _heatMap = new HeatMapOverlay(200, _map);
+        _heatMap = new HeatMapOverlay(400, _map);
         _map.getOverlays().add(_heatMap);
         
         Thread connect = new Thread(new ConnectingRunnable());
         connect.start();        
 	}
 	
+	public void onResume() {
+		super.onResume();
+		_mLoc.enableMyLocation();
+	}
+	public void onPause() {
+		super.onPause();
+		_mLoc.disableMyLocation();
+	}
 	/*Connects to the database, which Android mandates happens in separate thread*/
 	private class ConnectingRunnable implements Runnable {
 		public void run() {
@@ -164,5 +181,10 @@ public class ShowMapActivity extends MapActivity implements OnClickListener, Pan
 
 	public void onPan(GeoPoint old, GeoPoint current) {
 		updatePointsToCurrent();
+	}
+
+	public boolean onTouch(View v, MotionEvent event) {
+		updatePointsToCurrent();
+		return true;
 	}
 }

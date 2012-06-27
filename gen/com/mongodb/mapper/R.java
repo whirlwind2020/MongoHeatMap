@@ -17,7 +17,8 @@ public final class R {
     }
     public static final class id {
         public static final int layout=0x7f050000;
-        public static final int map_view_layout=0x7f050005;
+        public static final int map_root=0x7f050005;
+        public static final int map_view_layout=0x7f050006;
         public static final int start_database=0x7f050001;
         public static final int start_service=0x7f050002;
         public static final int stop_service=0x7f050003;
