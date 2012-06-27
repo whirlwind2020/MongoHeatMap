@@ -43,8 +43,15 @@ public class MongoHeatMapActivity extends Activity {
 		}
         
         Button startServer = (Button) findViewById(R.id.start_database);
+        startServer.setText((isServerRunning ? "Stop" : "Start") + "Database");
         startServer.setOnClickListener(new OnClickListener() {
         	public void onClick(View v) {
+        		if (isServerRunning) {
+        			Runtime.getRuntime().exec("kill " + databasePID);
+        			isServerRunning = false;
+        			startServer.setText("Start Database");
+        			return;
+        		}
         		try {
         			Runtime.getRuntime().exec("/system/bin/mkdir /data/db");
         			Runtime.getRuntime().exec("/system/bin/mkdir /data/tmp");
@@ -57,10 +64,22 @@ public class MongoHeatMapActivity extends Activity {
         });
         
         Button startMeasuring = (Button) findViewById(R.id.start_service);
+        startMeasuring.setText((isServiceRunning ? "Stop" : "Start") + "Measuring");
         startMeasuring.setOnClickListener(new OnClickListener() {
         	public void onClick(View v) {
+        		if (isServiceRunning) {
+        			//kill it
+        			Runtime.getRuntime().exec("kill " + servicePID);
+        			isServiceRunning = false;
+        			startMeasuring.setText("Start Measuring");
+        			return;
+        		}
         		Intent intent = new Intent(getApplicationContext(), DataCollectorService.class);
                 startService(intent);
+                
+                isServiceRunning = true;
+                startMeasuring.setText("Stop Measuring");
+
         	}
         });
         
