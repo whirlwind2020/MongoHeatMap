@@ -42,11 +42,11 @@ public class MongoHeatMapActivity extends Activity {
 
 		Button startServer = (Button) findViewById(R.id.start_database);
 		startServer.setText((isDatabaseRunning ? "Stop" : "Start") + " Database");
-		startServer.setOnClickListener(new DatabaseButtonClickListener(isDatabaseRunning, dbpid, startServer));
+		startServer.setOnClickListener(new DatabaseButtonClickListener(isDatabaseRunning, startServer));
 
 		Button startMeasuring = (Button) findViewById(R.id.start_service);
 		startMeasuring.setText((isServiceRunning ? "Stop" : "Start") + " Measuring");
-		startMeasuring.setOnClickListener(new ServiceButtonClickListener(isServiceRunning, servicepid, startMeasuring));
+		startMeasuring.setOnClickListener(new ServiceButtonClickListener(isServiceRunning, startMeasuring));
 
 		Button showMap = (Button) findViewById(R.id.view_map);
 		showMap.setOnClickListener(new OnClickListener() {
@@ -75,8 +75,8 @@ public class MongoHeatMapActivity extends Activity {
 				button.setText("Start Database");
 			} else {
 				try {
-					Runtime.getRuntime().exec("/system/bin/mkdir /data/db");
-					Runtime.getRuntime().exec("/system/bin/mkdir /data/tmp");
+					//Runtime.getRuntime().exec("/system/bin/mkdir /data/db");
+					//Runtime.getRuntime().exec("/system/bin/mkdir /data/tmp");
 					//Runtime.getRuntime().exec("chmod -R 777 /data/db");
 					Runtime.getRuntime().exec("/system/bin/rm /data/db/mongod.lock");
 					Process proc = Runtime.getRuntime().exec("/system/bin/mongod --unixSocketPrefix=/data/tmp");
