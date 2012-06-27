@@ -3,10 +3,6 @@ package org.jfrantz.poopers;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.UnknownHostException;
-
-import com.mongodb.Mongo;
-import com.mongodb.MongoException;
 
 import com.mongodb.mapper.R;
 
@@ -24,6 +20,28 @@ public class MongoHeatMapActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main); 
+        
+        boolean isDatabaseRunning = false, isServiceRunning = false;
+        int dbpid = 0, servicepid = 0;
+        
+        try {
+			Process lister = Runtime.getRuntime().exec("/system/bin/ps");
+			BufferedReader in  = new BufferedReader(new InputStreamReader(lister.getInputStream()));
+			String line = null;
+            while ( (line = in.readLine()) != null) {
+                if(line.indexOf("/system/bin/mongod") != -1) {
+                	dbpid = Integer.parseInt(line.split("[ ]+")[1]);
+                	isDatabaseRunning = true;
+                }
+                if(line.indexOf("signalcollector") != -1) {
+                	servicepid = Integer.parseInt(line.split("[ ]+")[1]);
+                	isServiceRunning = true;
+                }
+            }
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+        
         Button startServer = (Button) findViewById(R.id.start_database);
         startServer.setOnClickListener(new OnClickListener() {
         	public void onClick(View v) {
@@ -31,13 +49,7 @@ public class MongoHeatMapActivity extends Activity {
         			Runtime.getRuntime().exec("/system/bin/mkdir /data/db");
         			Runtime.getRuntime().exec("/system/bin/mkdir /data/tmp");
 					Runtime.getRuntime().exec("/system/bin/rm /data/db/mongod.lock");
-					Process proc = Runtime.getRuntime().exec("/system/bin/mongod --unixSocketPrefix=/data/tmp");
-					BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-					Log.d("StartingProcess", "Starting Process");
-					String line;
-					//while((line = in.readLine()) != null) {
-                    //     Log.d("StartingProcess",line);
-					//}
+					Runtime.getRuntime().exec("/system/bin/mongod --unixSocketPrefix=/data/tmp");
         		} catch (IOException e) {
 					e.printStackTrace();
 				}

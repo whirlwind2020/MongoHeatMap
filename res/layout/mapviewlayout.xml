@@ -9,6 +9,6 @@
         android:id="@+id/map_view_layout"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:apiKey="04zNmQwHS_rKdqk7AcQJ7jfsMayLOMHy2DyI3Vg"
+        android:apiKey="0OhDyciqGhW5zfBTIgvd9xEBy_hVtk3tdsYLu1w"
         android:clickable="true" />
 </RelativeLayout>
