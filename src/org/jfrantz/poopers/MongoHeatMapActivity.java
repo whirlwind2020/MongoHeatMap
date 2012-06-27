@@ -77,7 +77,6 @@ public class MongoHeatMapActivity extends Activity {
 				button.setText("Start Database");
 			} else {
 				try {
-<<<<<<< HEAD
 					Log.d("StartingDatabase", "Creating db directory: " + new File("/data/db").mkdir());
 					Log.d("StartingDatabase", "Creating socket directory: " + new File("/data/tmp").mkdir());
 					Log.d("StartingDatabase", "Deleting Lock File: " + new File("/data/db/mongod.lock").delete());
