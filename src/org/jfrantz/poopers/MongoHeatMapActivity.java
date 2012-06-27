@@ -4,8 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import com.mongodb.mapper.R;
-
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -13,6 +11,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+
+import com.mongodb.mapper.R;
 
 public class MongoHeatMapActivity extends Activity {
 	/** Called when the activity is first created. */
@@ -23,20 +23,17 @@ public class MongoHeatMapActivity extends Activity {
 
 		boolean isDatabaseRunning = false;
 		boolean isServiceRunning = false;
-		int dbpid = 0, servicepid = 0;
+		int dbpid = 0;
 
 		try {
 			Process lister = Runtime.getRuntime().exec("/system/bin/ps");
+
 			BufferedReader in  = new BufferedReader(new InputStreamReader(lister.getInputStream()));
 			String line = null;
 			while ( (line = in.readLine()) != null) {
 				if(line.indexOf("/system/bin/mongod") != -1) {
 					dbpid = Integer.parseInt(line.split("[ ]+")[1]);
-					isDatabaseRunning = true;
-				}
-				if(line.indexOf("signalcollector") != -1) {
-					servicepid = Integer.parseInt(line.split("[ ]+")[1]);
-					isServiceRunning = true;
+					Runtime.getRuntime().exec("kill " + dbpid);
 				}
 			}
 		} catch (IOException e1) {
@@ -45,11 +42,11 @@ public class MongoHeatMapActivity extends Activity {
 
 		Button startServer = (Button) findViewById(R.id.start_database);
 		startServer.setText((isDatabaseRunning ? "Stop" : "Start") + "Database");
-		startServer.setOnClickListener(new DatabaseButtonClickListener(isDatabaseRunning, dbpid, startServer));
+		startServer.setOnClickListener(new DatabaseButtonClickListener(isDatabaseRunning, startServer));
 
 		Button startMeasuring = (Button) findViewById(R.id.start_service);
 		startMeasuring.setText((isServiceRunning ? "Stop" : "Start") + "Measuring");
-		startMeasuring.setOnClickListener(new ServiceButtonClickListener(isServiceRunning, servicepid, startMeasuring));
+		startMeasuring.setOnClickListener(new ServiceButtonClickListener(isServiceRunning, startMeasuring));
 
 		Button showMap = (Button) findViewById(R.id.view_map);
 		showMap.setOnClickListener(new OnClickListener() {
@@ -64,23 +61,18 @@ public class MongoHeatMapActivity extends Activity {
 	/*Toggle start/stop database*/
 	private class DatabaseButtonClickListener implements OnClickListener {
 		boolean isRunning;
-		int PID;
 		Button button;
+		Process dbProc;
 
-		public DatabaseButtonClickListener(boolean isRunning, int PID, Button button) {
+		public DatabaseButtonClickListener(boolean isRunning, Button button) {
 			this.isRunning = isRunning;
-			this.PID = PID;
 			this.button = button;
 		}
 		public void onClick(View v) {
 			if (isRunning) {
-				try {
-					Runtime.getRuntime().exec("kill " + PID);
-					isRunning = false;
-					button.setText("Start Database");
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+				dbProc.destroy();
+				isRunning = false;
+				button.setText("Start Database");
 			} else {
 				try {
 					Runtime.getRuntime().exec("/system/bin/mkdir /data/db");
@@ -89,9 +81,15 @@ public class MongoHeatMapActivity extends Activity {
 					Process proc = Runtime.getRuntime().exec("/system/bin/mongod --unixSocketPrefix=/data/tmp");
 					BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 					Log.d("StartingProcess", "Starting Process");
-					isRunning = true;
-					button.setText("Stop Database");
 					String line;
+					while ( (line = in.readLine()) != null) {
+						if ( line.contains("/system/bin/mongod") ) {
+							isRunning = true;
+							button.setText("Stop Database");
+							dbProc = proc;
+							return;
+						}
+					}
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -101,12 +99,10 @@ public class MongoHeatMapActivity extends Activity {
 
 	private class ServiceButtonClickListener implements OnClickListener {
 		boolean isRunning;
-		int PID;
 		Button button;
 
-		public ServiceButtonClickListener(boolean isRunning, int PID, Button button) {
+		public ServiceButtonClickListener(boolean isRunning, Button button) {
 			this.isRunning = isRunning;
-			this.PID = PID;
 			this.button = button;
 		}
 		public void onClick(View v) {
