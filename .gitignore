@@ -1,3 +1,6 @@
 *.class
 .classpath
 *.jar
+*.apk
+*.dex
+mapviewlayout.xml

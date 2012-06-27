@@ -3,10 +3,6 @@ package org.jfrantz.poopers;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.UnknownHostException;
-
-import com.mongodb.Mongo;
-import com.mongodb.MongoException;
 
 import com.mongodb.mapper.R;
 
