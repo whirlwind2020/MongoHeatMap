@@ -31,6 +31,7 @@ import android.graphics.Paint;
 import android.graphics.Point;
 import android.graphics.RadialGradient;
 import android.graphics.Shader.TileMode;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import com.androidnatic.maps.model.HeatPoint;
@@ -116,6 +117,7 @@ public class HeatMapOverlay extends Overlay {
 			
 			Point out = new Point(1, 1);
 			for(HeatPoint p : points){
+				//Log.i("", p.toString());
 				GeoPoint in = new GeoPoint((int)(p.lat*1E6),(int)(p.lon*1E6));
 				proj.toPixels(in, out);
 				addPoint(out.x, out.y, p.intensity);

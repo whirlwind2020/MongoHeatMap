@@ -1,12 +1,14 @@
 package org.jfrantz.poopers;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -42,11 +44,11 @@ public class MongoHeatMapActivity extends Activity {
 
 		Button startServer = (Button) findViewById(R.id.start_database);
 		startServer.setText((isDatabaseRunning ? "Stop" : "Start") + " Database");
-		startServer.setOnClickListener(new DatabaseButtonClickListener(isDatabaseRunning, dbpid, startServer));
+		startServer.setOnClickListener(new DatabaseButtonClickListener(isDatabaseRunning, startServer));
 
 		Button startMeasuring = (Button) findViewById(R.id.start_service);
 		startMeasuring.setText((isServiceRunning ? "Stop" : "Start") + " Measuring");
-		startMeasuring.setOnClickListener(new ServiceButtonClickListener(isServiceRunning, servicepid, startMeasuring));
+		startMeasuring.setOnClickListener(new ServiceButtonClickListener(isServiceRunning, startMeasuring));
 
 		Button showMap = (Button) findViewById(R.id.view_map);
 		showMap.setOnClickListener(new OnClickListener() {
@@ -75,16 +77,17 @@ public class MongoHeatMapActivity extends Activity {
 				button.setText("Start Database");
 			} else {
 				try {
-					Runtime.getRuntime().exec("/system/bin/mkdir /data/db");
-					Runtime.getRuntime().exec("/system/bin/mkdir /data/tmp");
-					//Runtime.getRuntime().exec("chmod -R 777 /data/db");
-					Runtime.getRuntime().exec("/system/bin/rm /data/db/mongod.lock");
-					Process proc = Runtime.getRuntime().exec("/system/bin/mongod --unixSocketPrefix=/data/tmp");
-					BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-					Log.d("StartingProcess", "Starting Process");
+					Log.d("StartingDatabase", "Creating db directory: " + new File("/data/db").mkdir());
+					Log.d("StartingDatabase", "Creating socket directory: " + new File("/data/tmp").mkdir());
+					Log.d("StartingDatabase", "Deleting Lock File: " + new File("/data/db/mongod.lock").delete());
+					Process proc = Runtime.getRuntime().exec("/system/bin/mongod --dbpath=/data/db --unixSocketPrefix=/data/tmp");
+					Thread.sleep(1000);
+					Process ps = Runtime.getRuntime().exec("ps");
+					BufferedReader in = new BufferedReader(new InputStreamReader(ps.getInputStream()));
 					String line;
 					while ( (line = in.readLine()) != null) {
 						if ( line.contains("/system/bin/mongod") ) {
+							Log.d("StartingDatabase", "Process Started");
 							isRunning = true;
 							button.setText("Stop Database");
 							dbProc = proc;
@@ -92,6 +95,9 @@ public class MongoHeatMapActivity extends Activity {
 						}
 					}
 				} catch (IOException e) {
+					e.printStackTrace();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

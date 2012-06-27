@@ -20,6 +20,7 @@ import com.google.android.maps.GeoPoint;
 import com.google.android.maps.MapActivity;
 import com.google.android.maps.MapController;
 import com.google.android.maps.MyLocationOverlay;
+import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
@@ -130,15 +131,18 @@ public class ShowMapActivity extends MapActivity implements OnClickListener, Pan
 				
 				/*NOW: use this box to geospatial query*/
 				QueryBuilder q = new QueryBuilder();
-				q.withinCenterSphere(centerLong, centerLat, 100);
+				q.nearSphere(centerLong, centerLat, 100);
 
 				DBObject completedQuery = q.get();
 				
+				double[] loc = new double[]{centerLong, centerLat};
+				
 				//DBCursor results = _coll.find(completedQuery);
 				DBCursor results = _coll.find();
+				//DBCursor results = _coll.find( new BasicDBObject( "loc" , new BasicDBObject("$near", loc)));
 				
-				System.out.println(results == null);
-				System.out.println(results.length());
+				//System.out.println(results == null);
+				//System.out.println(results.length());
 				
 				List<HeatPoint> heatPoints = new ArrayList<HeatPoint>();
 				for( DBObject obj: results)
