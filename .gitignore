@@ -3,4 +3,4 @@
 *.jar
 *.apk
 *.dex
-mapviewlayout.xml
+res/layout/mapviewlayout.xml
